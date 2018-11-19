@@ -1,0 +1,525 @@
+<?xml version='1.0'?>
+<model name="caricature_2006" xmlns="http://www.cellml.org/cellml/1.1#" xmlns:cellml="http://www.cellml.org/cellml/1.1#" xmlns:cmeta="http://www.cellml.org/metadata/1.0#">
+    <!--
+    Below, we define some additional units for association with variables and
+    constants within the model. The identifiers are fairly self-explanatory.
+  -->
+    <units name="ms">
+        <unit prefix="milli" units="second"/>
+    </units>
+    <units name="per_ms">
+        <unit exponent="-1" prefix="milli" units="second"/>
+    </units>
+    <units name="mV">
+        <unit prefix="milli" units="volt"/>
+    </units>
+    <units name="per_mV">
+        <unit exponent="-1" prefix="milli" units="volt"/>
+    </units>
+    <units name="per_mV_ms">
+        <unit exponent="-1" units="mV"/>
+        <unit exponent="-1" units="ms"/>
+    </units>
+    <units name="mS_per_mm2">
+        <unit prefix="milli" units="siemens"/>
+        <unit exponent="-2" prefix="milli" units="metre"/>
+    </units>
+    <units name="uF_per_mm2">
+        <unit prefix="micro" units="farad"/>
+        <unit exponent="-2" prefix="milli" units="metre"/>
+    </units>
+    <units name="uA_per_mm2">
+        <unit prefix="micro" units="ampere"/>
+        <unit exponent="-2" prefix="milli" units="metre"/>
+    </units>
+    <units name="concentration_units">
+        <unit prefix="nano" units="mole"/>
+        <unit exponent="-3" prefix="milli" units="metre"/>
+    </units>
+    <units name="per_concentration_units">
+        <unit exponent="-1" units="concentration_units"/>
+    </units>
+    <units name="coulomb_per_mole">
+        <unit units="coulomb"/>
+        <unit exponent="-1" units="mole"/>
+    </units>
+    <units name="per_mm">
+        <unit exponent="-1" prefix="-3" units="metre"/>
+    </units>
+    <component name="environment">
+        <variable cmeta:id="environment_time" name="time" public_interface="out" units="ms"/>
+    </component>
+    <component name="membrane">
+        <variable cmeta:id="membrane_V" initial_value="-84.624" name="V" public_interface="out" units="mV"/>
+        <!--var{membrane_C} C: uF_per_mm2 {init: 0.01};-->
+        <variable name="time" public_interface="in" units="ms"/>
+        <variable name="i_Na" public_interface="in" units="uA_per_mm2"/>
+        <!--var i_s: uA_per_mm2 {pub: in};
+var i_x1: uA_per_mm2 {pub: in};-->
+        <variable name="i_K" public_interface="in" units="uA_per_mm2"/>
+        <variable name="Istim" public_interface="in" units="uA_per_mm2"/>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <apply>
+                    <diff/>
+                    <bvar>
+                        <ci>time</ci>
+                    </bvar>
+                    <ci>V</ci>
+                </apply>
+                <apply>
+                    <plus/>
+                    <ci>Istim</ci>
+                    <apply>
+                        <plus/>
+                        <ci>i_Na</ci>
+                        <ci>i_K</ci>
+                    </apply>
+                </apply>
+            </apply>
+        </math>
+    </component>
+    <component name="sodium_current">
+        <variable cmeta:id="sodium_current_i_Na" name="i_Na" public_interface="out" units="uA_per_mm2"/>
+        <variable initial_value="33.3333" name="G_Na" units="mS_per_mm2"/>
+        <variable initial_value="40.0" name="E_Na" units="mV"/>
+        <variable initial_value="-15.0" name="East" units="dimensionless"/>
+        <variable name="H1" units="dimensionless"/>
+        <variable name="time" private_interface="out" public_interface="in" units="ms"/>
+        <variable name="V" private_interface="out" public_interface="in" units="mV"/>
+        <!--var m: dimensionless {priv: in};-->
+        <variable name="h" private_interface="in" units="dimensionless"/>
+        <!--var j: dimensionless {priv: in};-->
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <ci>H1</ci>
+                <piecewise>
+                    <piece>
+                        <cn cellml:units="dimensionless">1.0</cn>
+                        <apply>
+                            <geq/>
+                            <ci>V</ci>
+                            <ci>East</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <cn cellml:units="dimensionless">0</cn>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <apply>
+                <eq/>
+                <ci>i_Na</ci>
+                <apply>
+                    <times/>
+                    <apply>
+                        <times/>
+                        <ci>G_Na</ci>
+                        <ci>h</ci>
+                    </apply>
+                    <apply>
+                        <minus/>
+                        <ci>E_Na</ci>
+                        <ci>V</ci>
+                    </apply>
+                    <ci>H1</ci>
+                </apply>
+            </apply>
+        </math>
+    </component>
+    <component name="sodium_current_h_gate">
+        <variable initial_value="1.0" name="h" public_interface="out" units="dimensionless"/>
+        <variable initial_value="0.5" name="F_h" units="mV"/>
+        <variable initial_value="-80.0" name="Edag" units="dimensionless"/>
+        <variable name="H2" units="dimensionless"/>
+        <!--var beta_h: per_ms;-->
+        <variable name="V" public_interface="in" units="mV"/>
+        <variable name="time" public_interface="in" units="ms"/>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <ci>H2</ci>
+                <piecewise>
+                    <piece>
+                        <cn cellml:units="dimensionless">1.0</cn>
+                        <apply>
+                            <leq/>
+                            <ci>V</ci>
+                            <ci>Edag</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <cn cellml:units="dimensionless">0</cn>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <!--alpha_h = 0.126{per_ms}*exp(-0.25{per_mV}*(V+77{mV}));
+beta_h = 1.7{per_ms}/(exp(-0.082{per_mV}*(V+22.5{mV}))+1{dimensionless});-->
+            <apply>
+                <eq/>
+                <apply>
+                    <diff/>
+                    <bvar>
+                        <ci>time</ci>
+                    </bvar>
+                    <ci>h</ci>
+                </apply>
+                <apply>
+                    <times/>
+                    <ci>F_h</ci>
+                    <apply>
+                        <minus/>
+                        <ci>H2</ci>
+                        <ci>h</ci>
+                    </apply>
+                </apply>
+            </apply>
+        </math>
+    </component>
+    <component name="time_independent_outward_current">
+        <variable cmeta:id="time_independent_outward_current_i_K" name="i_K" public_interface="out" units="uA_per_mm2"/>
+        <variable name="g_2" units="dimensionless"/>
+        <variable name="G" units="dimensionless"/>
+        <variable initial_value="-80.0" name="Edag" units="dimensionless"/>
+        <variable initial_value="-15.0" name="East" units="dimensionless"/>
+        <variable initial_value="0.075" name="k_1" units="dimensionless"/>
+        <variable initial_value="0.04" name="k_2" units="dimensionless"/>
+        <variable initial_value="0.1" name="k_3" units="dimensionless"/>
+        <variable initial_value="-93.3333" name="E_1" units="dimensionless"/>
+        <variable initial_value="-55.0" name="E_2" units="dimensionless"/>
+        <variable initial_value="1.0" name="E_3" units="dimensionless"/>
+        <variable name="time" public_interface="in" units="ms"/>
+        <variable name="V" public_interface="in" units="mV"/>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <ci>g_2</ci>
+                <piecewise>
+                    <piece>
+                        <ci>g_22</ci>
+                        <apply>
+                            <geq/>
+                            <ci>V</ci>
+                            <ci>Edag</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <ci>g_21</ci>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <apply>
+                <eq/>
+                <ci>G</ci>
+                <piecewise>
+                    <piece>
+                        <apply>
+                            <times/>
+                            <ci>k_1</ci>
+                            <apply>
+                                <minus/>
+                                <ci>E_1</ci>
+                                <ci>V</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <lt/>
+                            <ci>V</ci>
+                            <ci>Edag</ci>
+                        </apply>
+                    </piece>
+                    <piece>
+                        <apply>
+                            <times/>
+                            <ci>k_3</ci>
+                            <apply>
+                                <minus/>
+                                <ci>E_3</ci>
+                                <ci>V</ci>
+                            </apply>
+                        </apply>
+                        <apply>
+                            <geq/>
+                            <ci>V</ci>
+                            <ci>East</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <apply>
+                            <times/>
+                            <ci>k_2</ci>
+                            <apply>
+                                <minus/>
+                                <ci>V</ci>
+                                <ci>E_2</ci>
+                            </apply>
+                        </apply>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <apply>
+                <eq/>
+                <ci>i_K</ci>
+                <apply>
+                    <plus/>
+                    <apply>
+                        <times/>
+                        <ci>g_2</ci>
+                        <apply>
+                            <power/>
+                            <ci>n</ci>
+                            <cn cellml:units="dimensionless">4</cn>
+                        </apply>
+                    </apply>
+                    <ci>G</ci>
+                </apply>
+            </apply>
+        </math>
+    </component>
+    <component name="sodium_current_n_gate">
+        <variable initial_value="0.0" name="n" public_interface="out" units="dimensionless"/>
+        <variable initial_value="0.0037037" name="f_n" units="dimensionless"/>
+        <variable initial_value="1.0" name="r" units="dimensionless"/>
+        <variable initial_value="-80.0" name="Edag" units="dimensionless"/>
+        <variable name="H3" units="per_ms"/>
+        <variable name="F_n" units="per_ms"/>
+        <variable name="V" public_interface="in" units="mV"/>
+        <variable name="time" public_interface="in" units="ms"/>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <ci>F_n</ci>
+                <piecewise>
+                    <piece>
+                        <ci>f_n</ci>
+                        <apply>
+                            <geq/>
+                            <ci>V</ci>
+                            <ci>Edag</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <apply>
+                            <times/>
+                            <ci>f_n</ci>
+                            <ci>r</ci>
+                        </apply>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <apply>
+                <eq/>
+                <ci>H3</ci>
+                <piecewise>
+                    <piece>
+                        <cn cellml:units="dimensionless">1.0</cn>
+                        <apply>
+                            <geq/>
+                            <ci>V</ci>
+                            <ci>Edag</ci>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <cn cellml:units="dimensionless">0</cn>
+                    </otherwise>
+                </piecewise>
+            </apply>
+            <!--alpha_h = 0.126{per_ms}*exp(-0.25{per_mV}*(V+77{mV}));
+beta_h = 1.7{per_ms}/(exp(-0.082{per_mV}*(V+22.5{mV}))+1{dimensionless});-->
+            <apply>
+                <eq/>
+                <apply>
+                    <diff/>
+                    <bvar>
+                        <ci>time</ci>
+                    </bvar>
+                    <ci>n</ci>
+                </apply>
+                <apply>
+                    <times/>
+                    <ci>F_n</ci>
+                    <apply>
+                        <minus/>
+                        <ci>H3</ci>
+                        <ci>n</ci>
+                    </apply>
+                </apply>
+            </apply>
+        </math>
+    </component>
+    <component name="stimulus_protocol">
+        <variable name="Istim" public_interface="out" units="uA_per_mm2"/>
+        <variable initial_value="10" name="IstimStart" units="ms"/>
+        <variable initial_value="50000" name="IstimEnd" units="ms"/>
+        <variable initial_value="0.5" name="IstimAmplitude" units="uA_per_mm2"/>
+        <variable initial_value="1000" name="IstimPeriod" units="ms"/>
+        <variable initial_value="1" name="IstimPulseDuration" units="ms"/>
+        <variable name="time" public_interface="in" units="ms"/>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <apply>
+                <eq/>
+                <ci>Istim</ci>
+                <piecewise>
+                    <piece>
+                        <ci>IstimAmplitude</ci>
+                        <apply>
+                            <and/>
+                            <apply>
+                                <geq/>
+                                <ci>time</ci>
+                                <ci>IstimStart</ci>
+                            </apply>
+                            <apply>
+                                <leq/>
+                                <ci>time</ci>
+                                <ci>IstimEnd</ci>
+                            </apply>
+                            <apply>
+                                <leq/>
+                                <apply>
+                                    <minus/>
+                                    <apply>
+                                        <minus/>
+                                        <ci>time</ci>
+                                        <ci>IstimStart</ci>
+                                    </apply>
+                                    <apply>
+                                        <times/>
+                                        <apply>
+                                            <floor/>
+                                            <apply>
+                                                <divide/>
+                                                <apply>
+                                                    <minus/>
+                                                    <ci>time</ci>
+                                                    <ci>IstimStart</ci>
+                                                </apply>
+                                                <ci>IstimPeriod</ci>
+                                            </apply>
+                                        </apply>
+                                        <ci>IstimPeriod</ci>
+                                    </apply>
+                                </apply>
+                                <ci>IstimPulseDuration</ci>
+                            </apply>
+                        </apply>
+                    </piece>
+                    <otherwise>
+                        <cn cellml:units="uA_per_mm2">0</cn>
+                    </otherwise>
+                </piecewise>
+            </apply>
+        </math>
+    </component>
+    <group>
+        <relationship_ref relationship="containment"/>
+        <component_ref component="membrane">
+            <component_ref component="sodium_current">
+                <!--comp sodium_current_m_gate;-->
+                <component_ref component="sodium_current_h_gate"/>
+                <!--comp sodium_current_j_gate;-->
+            </component_ref>
+            <component_ref component="time_dependent_outward_current">
+                <component_ref component="time_dependent_outward_current_n_gate"/>
+            </component_ref>
+            <!--comp time_independent_outward_current;-->
+        </component_ref>
+    </group>
+    <group>
+        <relationship_ref relationship="encapsulation"/>
+        <component_ref component="sodium_current">
+            <!--comp sodium_current_m_gate;-->
+            <component_ref component="sodium_current_h_gate"/>
+            <!--comp sodium_current_j_gate;-->
+        </component_ref>
+        <component_ref component="time_dependent_outward_current">
+            <component_ref component="time_dependent_outward_current_n_gate"/>
+        </component_ref>
+    </group>
+    <connection>
+        <map_components component_1="membrane" component_2="environment"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+    <connection>
+        <map_components component_1="sodium_current" component_2="environment"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+    <connection>
+        <map_components component_1="slow_inward_current" component_2="environment"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+    <connection>
+        <map_components component_1="time_dependent_outward_current" component_2="environment"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+    <connection>
+        <map_components component_1="time_independent_outward_current" component_2="environment"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+    <connection>
+        <map_components component_1="membrane" component_2="sodium_current"/>
+        <map_variables variable_1="V" variable_2="V"/>
+        <map_variables variable_1="i_Na" variable_2="i_Na"/>
+    </connection>
+    <connection>
+        <map_components component_1="membrane" component_2="slow_inward_current"/>
+        <map_variables variable_1="V" variable_2="V"/>
+        <map_variables variable_1="i_s" variable_2="i_s"/>
+    </connection>
+    <connection>
+        <map_components component_1="membrane" component_2="time_dependent_outward_current"/>
+        <map_variables variable_1="V" variable_2="V"/>
+        <map_variables variable_1="i_x1" variable_2="i_x1"/>
+    </connection>
+    <connection>
+        <map_components component_1="membrane" component_2="time_independent_outward_current"/>
+        <map_variables variable_1="V" variable_2="V"/>
+        <map_variables variable_1="i_K1" variable_2="i_K1"/>
+    </connection>
+    <connection>
+        <map_components component_1="sodium_current" component_2="sodium_current_m_gate"/>
+        <map_variables variable_1="m" variable_2="m"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="sodium_current" component_2="sodium_current_h_gate"/>
+        <map_variables variable_1="h" variable_2="h"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="sodium_current" component_2="sodium_current_j_gate"/>
+        <map_variables variable_1="j" variable_2="j"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="time_dependent_outward_current" component_2="time_dependent_outward_current_x1_gate"/>
+        <map_variables variable_1="x1" variable_2="x1"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="slow_inward_current" component_2="slow_inward_current_d_gate"/>
+        <map_variables variable_1="d" variable_2="d"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="slow_inward_current" component_2="slow_inward_current_f_gate"/>
+        <map_variables variable_1="f" variable_2="f"/>
+        <map_variables variable_1="time" variable_2="time"/>
+        <map_variables variable_1="V" variable_2="V"/>
+    </connection>
+    <connection>
+        <map_components component_1="membrane" component_2="stimulus_protocol"/>
+        <map_variables variable_1="Istim" variable_2="Istim"/>
+    </connection>
+    <connection>
+        <map_components component_1="environment" component_2="stimulus_protocol"/>
+        <map_variables variable_1="time" variable_2="time"/>
+    </connection>
+</model>
